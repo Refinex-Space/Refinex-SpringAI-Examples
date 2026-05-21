@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.11</version>
+        <version>3.5.8</version>
         <relativePath/>
     </parent>
 
@@ -20,10 +20,13 @@
 
     <properties>
         <java.version>21</java.version>
+
+        <!-- https://github.com/spring-projects/spring-ai/tree/1.1.2 -->
         <spring.ai.version>1.1.2</spring.ai.version>
-        <fastjson.version>2.0.43</fastjson.version>
         <!-- https://java2ai.com/docs/quick-start -->
         <spring.ai.alibaba.version>1.1.2.0</spring.ai.alibaba.version>
+
+        <fastjson.version>2.0.43</fastjson.version>
     </properties>
 
     <dependencyManagement>
