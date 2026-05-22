@@ -17,6 +17,9 @@
 
     <name>${project.artifactId}</name>
     <description>Refinex Spring AI Examples</description>
+    <modules>
+        <module>refinex-httpclient</module>
+    </modules>
 
     <properties>
         <java.version>21</java.version>
