@@ -136,7 +136,6 @@ public class PromptEngineerController implements InitializingBean {
 
     /**
      * 初始化 聊天客户端
-     *
      */
     @Override
     public void afterPropertiesSet() {
