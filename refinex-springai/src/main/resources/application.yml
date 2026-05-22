@@ -1,0 +1,5 @@
+spring:
+  ai:
+    dashscope:
+      # 从环境变量中获取 Dashscope 的 API 密钥
+      api-key: ${DASHSCOPE_API_KEY}
