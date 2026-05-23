@@ -10,6 +10,11 @@ spring:
             initialize-schema: always
             platform: mysql
 
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        model: deepseek-r1:7b
+
   datasource:
     url: jdbc:mysql://${MYSQL_IP}:${MYSQL_PORT}/spring_ai_db?useUnicode=true&characterEncoding=UTF-8
     username: ${MYSQL_USERNAME}
