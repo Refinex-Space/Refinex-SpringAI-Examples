@@ -1,0 +1,39 @@
+server:
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+
+spring:
+
+  application:
+    name: weather-streamable-server
+
+  ai:
+    mcp:
+      server:
+        # MCP Server 协议：sse | stateless | streamable
+        protocol: streamable
+        # MCP Server 名称
+        name: weather-streamable-server
+        # MCP Server 版本
+        version: 1.0.0
+        # MCP Server 指令
+        instructions: "此服务用于天气查询"
+        # MCP Server 是否启用
+        enabled: true
+        # MCP Server 类型：sync(同步) | async(异步)
+        type: sync
+        # MCP Server 是否启用资源变更通知
+        resource-change-notification: true
+        # MCP Server 是否启用工具变更通知
+        tool-change-notification: true
+        # MCP Server 是否启用提示变更通知
+        prompt-change-notification: true
+        # MCP Server 是否启用流式 HTTP 服务
+        streamable-http:
+          # MCP Server 流式 HTTP 端点
+          mcp-endpoint: /mcp
+          # MCP Server 流式 HTTP 保持连接间隔
+          keep-alive-interval: 30s

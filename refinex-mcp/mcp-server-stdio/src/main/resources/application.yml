@@ -1,0 +1,29 @@
+spring:
+
+  application:
+    name: weather-stdio-server
+
+  main:
+    # Disable web application
+    web-application-type: none
+    # Disable banner
+    banner-mode: off
+
+  ai:
+    mcp:
+      server:
+        # MCP Server 名称
+        name: weather-stdio-server
+        # MCP Server 版本
+        version: 1.0.0
+        # MCP Server 是否启用 StdIO
+        stdio: true
+        # MCP Server 是否启用
+        enabled: true
+        # MCP Server 类型：sync(同步) | async(异步)
+        type: sync
+
+logging:
+  level:
+    # Disable logging
+    root: off

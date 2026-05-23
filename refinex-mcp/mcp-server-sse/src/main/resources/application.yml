@@ -1,0 +1,37 @@
+server:
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+
+spring:
+
+  application:
+    name: weather-sse-server
+
+  ai:
+    mcp:
+      server:
+        # MCP Server 名称
+        name: weather-sse-server
+        # MCP Server 版本
+        version: 1.0.0
+        # MCP Server 是否启用
+        enabled: true
+        # MCP Server 类型：sync(同步) | async(异步)
+        type: sync
+        # MCP Server 能力
+        capabilities:
+          # MCP Server 是否启用工具能力
+          tool: true
+          # MCP Server 是否启用资源能力
+          resource: true
+          # MCP Server 是否启用提示能力
+          prompt: false
+          # MCP Server 是否启用完成能力
+          completion: true
+        # MCP Server SSE 消息端点: 客户端向 MCP Server 发送指令
+        sse-message-endpoint: /mcp/message
+        # MCP Server SSE 端点: MCP Server 向客户端推送消息
+        sse-endpoint: /sse
