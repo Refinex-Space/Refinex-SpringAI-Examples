@@ -12,3 +12,12 @@ langchain4j:
       log-requests: true
       # 是否记录响应
       log-responses: true
+
+    # 流式聊天模型配置
+    streaming-chat-model:
+      # 百炼密钥
+      api-key: ${DASHSCOPE_API_KEY}
+      # 模型名称
+      model-name: qwen-max-latest
+      # 基础URL
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
