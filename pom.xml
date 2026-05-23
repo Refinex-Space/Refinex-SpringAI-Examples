@@ -22,6 +22,7 @@
         <module>refinex-httpclient</module>
         <module>refinex-springai</module>
         <module>refinex-langchain4j</module>
+        <module>refinex-toolcalling</module>
     </modules>
 
     <properties>

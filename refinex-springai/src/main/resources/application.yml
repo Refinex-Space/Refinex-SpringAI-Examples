@@ -1,4 +1,7 @@
 spring:
+  application:
+    name: refinex-springai
+
   ai:
     dashscope:
       # 从环境变量中获取 Dashscope 的 API 密钥

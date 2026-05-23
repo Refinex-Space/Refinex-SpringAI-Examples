@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: toolcalling
+
+  ai:
+    openai:
+      api-key: ${DASHSCOPE_API_KEY}
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/
+      chat:
+        options:
+          model: qwen-plus
+          temperature: 0.7
+          max-tokens: 5000

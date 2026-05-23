@@ -1,3 +1,7 @@
+spring:
+  application:
+    name: refinex-langchain4j
+
 langchain4j:
   open-ai:
     # 聊天模型配置
