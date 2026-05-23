@@ -48,3 +48,7 @@ out/
 *.zip
 *.tar.gz
 *.rar
+
+# Env
+.env
+!.env.example

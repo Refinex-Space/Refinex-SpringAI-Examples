@@ -3,3 +3,15 @@ spring:
     dashscope:
       # 从环境变量中获取 Dashscope 的 API 密钥
       api-key: ${DASHSCOPE_API_KEY}
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: always
+            platform: mysql
+
+  datasource:
+    url: jdbc:mysql://${MYSQL_IP}:${MYSQL_PORT}/spring_ai_db?useUnicode=true&characterEncoding=UTF-8
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
