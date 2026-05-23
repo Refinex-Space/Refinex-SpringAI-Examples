@@ -20,16 +20,16 @@ import reactor.core.publisher.Flux;
 @RequestMapping("/ollama")
 public class OllamaChatController {
 
-    @Autowired
-    @Qualifier("ollamaChatModel")
-    private ChatModel ollamaChatModel;
-
-    @GetMapping("/stream/chat")
-    public Flux<String> streamChat(@RequestParam(value = "message") String message, HttpServletResponse response) {
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("text/event-stream");
-
-        return ollamaChatModel.stream(new Prompt(message))
-                .map(resp -> resp.getResult().getOutput().getText());
-    }
+//    @Autowired
+//    @Qualifier("ollamaChatModel")
+//    private ChatModel ollamaChatModel;
+//
+//    @GetMapping("/stream/chat")
+//    public Flux<String> streamChat(@RequestParam(value = "message") String message, HttpServletResponse response) {
+//        response.setCharacterEncoding("UTF-8");
+//        response.setContentType("text/event-stream");
+//
+//        return ollamaChatModel.stream(new Prompt(message))
+//                .map(resp -> resp.getResult().getOutput().getText());
+//    }
 }
