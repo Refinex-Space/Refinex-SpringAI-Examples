@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: mcp-client
+
+  ai:
+    openai:
+      api-key: ${DASHSCOPE_API_KEY}
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/
+      chat:
+        options:
+          model: qwen-plus
+          temperature: 0.7
+          maxTokens: 5000
+
+    mcp:
+      # MCP Client Configuration
+      client:
+        # 是否启用MCP客户端
+        enabled: true
+        # MCP客户端名称
+        name: mcp-client
+        # MCP客户端版本
+        version: 1.0.0
+        # MCP客户端请求超时时间，默认 20s
+        request-timeout: 20s
+        # MCP客户端请求类型，默认 sync，可选值 sync(同步) | async(异步)
+        type: sync
+
+        # MCP客户端stdio连接配置
+        stdio:
+          # 不推荐，因为目前仅仅支持 Stdio
+          #servers-configuration: classpath:mcp-servers.json
+          connections:
+            # MCP Server：与 spring.ai.mcp.server.name 保持一致即可
+            weather-stdio-server:
+              # 使用Java命令启动MCP Server
+              command: java
+              # MCP Server启动参数
+              args:
+                - -jar
+                - "/Users/refinex/develop/project/Refinex-SpringAI-Examples/refinex-mcp/mcp-server-stdio/target/mcp-server-stdio-1.0.0-SNAPSHOT.jar"
+
+        # MCP客户端sse连接配置
+#        sse:
+#          connections:
+#            # MCP Server：与 spring.ai.mcp.server.name 保持一致即可
+#            weather-sse-server:
+#              # MCP Server地址
+#              url: http://127.0.0.1:8082/
+#              # MCP Server SSE端点
+#              sse-endpoint: /sse
+
+        # MCP客户端streamable-http连接配置
+#        streamable-http:
+#          connections:
+#            # MCP Server：与 spring.ai.mcp.server.name 保持一致即可
+#            weather-streamable-server:
+#              # MCP Server地址
+#              url: http://127.0.0.1:8083/
+#              # MCP Server端点
+#              endpoint: /mcp

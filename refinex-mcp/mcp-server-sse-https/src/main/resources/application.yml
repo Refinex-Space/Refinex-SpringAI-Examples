@@ -1,5 +1,17 @@
 server:
-  port: 8082
+  # SSL 配置
+  ssl:
+    # 密钥库位置
+    key-store: classpath:keystore.p12
+    # 密钥库密码
+    key-store-password: 123456
+    # 密钥库类型
+    key-store-type: PKCS12
+    # 密钥别名
+    key-alias: local-ssl
+    # 是否启用 SSL
+    enabled: true
+  port: 8084
   servlet:
     encoding:
       charset: UTF-8
@@ -9,13 +21,13 @@ server:
 spring:
 
   application:
-    name: weather-sse-server
+    name: weather-sse-https-server
 
   ai:
     mcp:
       server:
         # MCP Server 名称
-        name: weather-sse-server
+        name: weather-sse-https-server
         # MCP Server 版本
         version: 1.0.0
         # MCP Server 是否启用

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "weather-stdio-server": {
+      "command": "java",
+      "args": ["-jar", "/Users/refinex/develop/project/Refinex-SpringAI-Examples/refinex-mcp/mcp-server-stdio/target/mcp-server-stdio-1.0.0-SNAPSHOT.jar"]
+    }
+  }
+}
