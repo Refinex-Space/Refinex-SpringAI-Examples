@@ -93,6 +93,25 @@ class MarkdownHeaderTextSplitterTest {
         assertDoesNotThrow(() -> splitWithMetadata.invoke(splitter, "# Root\nBody", null));
     }
 
+    @Test
+    @DisplayName("should split aggregated markdown chunk by size with overlap")
+    void shouldSplitAggregatedMarkdownChunkBySizeWithOverlap() {
+        MarkdownHeaderTextSplitter splitter = new MarkdownHeaderTextSplitter(headers(), false, true, false, 8, 2);
+        Document source = new Document("""
+                # Root
+                abcdefghijk
+                """, Map.of("source", "unit-test"));
+
+        List<Document> documents = splitter.apply(List.of(source));
+
+        assertEquals(List.of("abcdefgh", "gh\nijk"), documents.stream().map(Document::getText).toList());
+        assertAll("split metadata",
+                () -> assertEquals(0, documents.get(0).getMetadata().get("segmentIndex")),
+                () -> assertEquals(1, documents.get(1).getMetadata().get("segmentIndex")),
+                () -> assertEquals(true, documents.get(0).getMetadata().get("isSplit")),
+                () -> assertEquals("Root", documents.get(1).getMetadata().get("h1")));
+    }
+
     private static Map<String, String> headers() {
         Map<String, String> headers = new LinkedHashMap<>();
         headers.put("#", "h1");

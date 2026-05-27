@@ -3,7 +3,6 @@ package cn.refinex.rag.splitter;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.ai.document.Document;
-import org.springframework.ai.transformer.splitter.TextSplitter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,7 +19,17 @@ import java.util.UUID;
  * @author andyflury（https://github.com/langchain4j/langchain4j/issues/574）
  * @author refinex, 增加对父子分段的支持
  */
-public class MarkdownHeaderTextSplitter extends TextSplitter {
+public class MarkdownHeaderTextSplitter extends OverlapParagraphTextSplitter {
+
+    /**
+     * 兼容旧构造器的默认最大块大小，实际等价于不触发二次切分。
+     */
+    private static final int DEFAULT_CHUNK_SIZE = Integer.MAX_VALUE;
+
+    /**
+     * 兼容旧构造器的默认重叠字符数。
+     */
+    private static final int DEFAULT_OVERLAP = 0;
 
     /**
      * 代码块定界符
@@ -46,6 +55,16 @@ public class MarkdownHeaderTextSplitter extends TextSplitter {
      * 父分段 ID 元数据键名
      */
     private static final String PARENT_CHUNK_ID_METADATA_KEY = "parentChunkId";
+
+    /**
+     * 子分片索引在元数据中的键名。
+     */
+    private static final String SEGMENT_INDEX_METADATA_KEY = "segmentIndex";
+
+    /**
+     * 是否由大小限制二次切分的元数据键名。
+     */
+    private static final String IS_SPLIT_METADATA_KEY = "isSplit";
 
     /**
      * 分段分隔符
@@ -90,6 +109,27 @@ public class MarkdownHeaderTextSplitter extends TextSplitter {
             boolean returnEachLine,
             boolean stripHeaders,
             boolean parentChildModel) {
+        this(headersToSplitOn, returnEachLine, stripHeaders, parentChildModel, DEFAULT_CHUNK_SIZE, DEFAULT_OVERLAP);
+    }
+
+    /**
+     * 创建支持标题层级和大小重叠二次切分的 Markdown 分割器。
+     *
+     * @param headersToSplitOn 标题分割映射表，key 为标题标记（如 "#"、"##"），value 为元数据中的键名
+     * @param returnEachLine   是否按行返回结果，false 时会聚合相同元数据的行并启用大小切分
+     * @param stripHeaders     是否在结果中移除标题行
+     * @param parentChildModel 是否启用父子分段模式，启用后会在元数据中添加 parentChunkId
+     * @param chunkSize        每块最大字符数，必须大于 0
+     * @param overlap          相邻块之间重叠字符数，必须大于等于 0 且小于 {@code chunkSize}
+     */
+    public MarkdownHeaderTextSplitter(
+            Map<String, String> headersToSplitOn,
+            boolean returnEachLine,
+            boolean stripHeaders,
+            boolean parentChildModel,
+            int chunkSize,
+            int overlap) {
+        super(chunkSize, overlap);
         // 按标题标记长度倒序排列，确保优先匹配更长的标记（如 "###" 优先于 "##"）
         this.headersToSplitOn = headersToSplitOn.entrySet().stream()
                 .sorted(Comparator.comparingInt(e -> -e.getKey().length()))
@@ -182,6 +222,26 @@ public class MarkdownHeaderTextSplitter extends TextSplitter {
      * @return 聚合后的分段列表
      */
     private List<DocumentWithMetadata> aggregateLinesToChunks(List<Line> lines) {
+        List<Line> aggregatedChunks = mergeLinesByMetadata(lines);
+        List<Line> sizeAdjustedChunks = applySizeBasedSplitting(aggregatedChunks);
+
+        // 处理父子分段关系
+        if (parentChildModel) {
+            fillParentChunkIds(sizeAdjustedChunks);
+        }
+
+        return sizeAdjustedChunks.stream()
+                .map(chunk -> new DocumentWithMetadata(chunk.getContent(), chunk.getMetadata()))
+                .toList();
+    }
+
+    /**
+     * 合并元数据相同或标题子级承接关系明确的相邻行。
+     *
+     * @param lines 待合并的行列表
+     * @return 聚合后的行分块
+     */
+    private List<Line> mergeLinesByMetadata(List<Line> lines) {
         List<Line> aggregatedChunks = new ArrayList<>();
 
         for (Line line : lines) {
@@ -193,14 +253,7 @@ public class MarkdownHeaderTextSplitter extends TextSplitter {
             aggregatedChunks.add(line);
         }
 
-        // 处理父子分段关系
-        if (parentChildModel) {
-            fillParentChunkIds(aggregatedChunks);
-        }
-
-        return aggregatedChunks.stream()
-                .map(chunk -> new DocumentWithMetadata(chunk.getContent(), chunk.getMetadata()))
-                .toList();
+        return aggregatedChunks;
     }
 
     /**
@@ -404,6 +457,69 @@ public class MarkdownHeaderTextSplitter extends TextSplitter {
     private void mergeWithLastChunk(List<Line> aggregatedChunks, Line line) {
         Line last = aggregatedChunks.getLast();
         last.setContent(last.getContent() + CHUNK_SEPARATOR + line.getContent());
+    }
+
+    /**
+     * 对超过 chunkSize 的 Markdown 聚合分块执行二次切分。
+     *
+     * @param chunks 已聚合的分块列表
+     * @return 按大小切分后的分块列表
+     */
+    private List<Line> applySizeBasedSplitting(List<Line> chunks) {
+        List<Line> result = new ArrayList<>();
+
+        for (Line chunk : chunks) {
+            result.addAll(splitOversizedChunk(chunk));
+        }
+
+        return result;
+    }
+
+    /**
+     * 对单个 Markdown 分块执行大小判断和必要的二次切分。
+     *
+     * @param chunk 原始聚合分块
+     * @return 原分块或切分后的子分块列表
+     */
+    private List<Line> splitOversizedChunk(Line chunk) {
+        if (chunk.getContent().length() <= getChunkSize()) {
+            return List.of(chunk);
+        }
+
+        return splitChunkBySize(chunk);
+    }
+
+    /**
+     * 复用父类段落 overlap 策略切分超长 Markdown 分块。
+     *
+     * @param chunk 原始聚合分块
+     * @return 继承原元数据并带 segmentIndex 的子分块列表
+     */
+    private List<Line> splitChunkBySize(Line chunk) {
+        List<String> subContents = super.splitText(chunk.getContent());
+        List<Line> result = new ArrayList<>(subContents.size());
+
+        for (int index = 0; index < subContents.size(); index++) {
+            result.add(new Line(subContents.get(index), createSegmentMetadata(chunk, index)));
+        }
+
+        return result;
+    }
+
+    /**
+     * 为二次切分后的 Markdown 子分块创建元数据副本。
+     *
+     * @param chunk        原始聚合分块
+     * @param segmentIndex 子分块序号
+     * @return 子分块元数据
+     */
+    private Map<String, Object> createSegmentMetadata(Line chunk, int segmentIndex) {
+        Map<String, Object> segmentMetadata = new HashMap<>(chunk.getMetadata());
+        Object originalChunkId = chunk.getMetadata().getOrDefault(CHUNK_ID_METADATA_KEY, UUID.randomUUID().toString());
+        segmentMetadata.put(CHUNK_ID_METADATA_KEY, originalChunkId + "_" + segmentIndex);
+        segmentMetadata.put(SEGMENT_INDEX_METADATA_KEY, segmentIndex);
+        segmentMetadata.put(IS_SPLIT_METADATA_KEY, true);
+        return segmentMetadata;
     }
 
     /**
