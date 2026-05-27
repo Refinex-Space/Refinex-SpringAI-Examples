@@ -1,0 +1,11 @@
+server:
+  port:
+    9091
+
+spring:
+  application:
+    name: rag
+
+  ai:
+    dashscope:
+      api-key: ${DASHSCOPE_API_KEY}

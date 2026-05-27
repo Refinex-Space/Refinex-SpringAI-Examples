@@ -23,6 +23,7 @@
         <module>refinex-springai</module>
         <module>refinex-langchain4j</module>
         <module>refinex-toolcalling</module>
+        <module>refinex-rag</module>
     </modules>
 
     <properties>
